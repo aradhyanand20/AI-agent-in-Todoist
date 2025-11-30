@@ -13,10 +13,10 @@ todoist_api_key = os.getenv("TODOIST_API_KEY")
 gemini_api_key = os.getenv("GEMINI_API_KEY")
 
 @tool
-def add_task():
+def add_task(task):
     """
    Add a new task to the user's task list. Use this when the user  wants to add or create a task """
-    print("adding a task")
+    print(task)
     print("task added")
 
 tools = [add_task]
@@ -27,7 +27,7 @@ llm = ChatGoogleGenerativeAI(
      temperature=0.3)
 
 system_propmt = "You are a helpful assistant. You will help with the user and tasks"                 
-user_input = "Add task to buy some milk"
+user_input = "Add task to get a new tire"
 
 prompt = ChatPromptTemplate.from_messages([
     ("system", system_propmt),
@@ -35,7 +35,7 @@ prompt = ChatPromptTemplate.from_messages([
     MessagesPlaceholder("agent_scratchpad")  # type: ignore
 ])
 agent = create_openai_functions_agent(llm,tools,prompt)
-agent_executor = AgentExecutor(agent=agent,tools = tools,verbose=True)
+agent_executor = AgentExecutor(agent=agent,tools = tools,verbose=False)
 
 response = agent_executor.invoke({"input": user_input})
 
