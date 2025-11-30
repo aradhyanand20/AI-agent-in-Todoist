@@ -6,28 +6,33 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain.tools import tool
 from langchain.agents import create_openai_functions_agent, AgentExecutor
+from todoist_api_python.api import TodoistAPI
 
 load_dotenv()
 
 todoist_api_key = os.getenv("TODOIST_API_KEY")
 gemini_api_key = os.getenv("GEMINI_API_KEY")
+todoist = TodoistAPI(todoist_api_key)
+
 
 @tool
-def add_task(task):
+def add_task(task,desc):
     """
    Add a new task to the user's task list. Use this when the user  wants to add or create a task """
-    print(task)
-    print("task added")
+    todoist.add_task(content=task,
+                     description=desc)
+    
+    
 
 tools = [add_task]
 
 llm = ChatGoogleGenerativeAI(
     model = 'gemini-2.5-flash', 
     google_api_key=gemini_api_key,
-     temperature=0.3)
+     temperature=0.4)
 
 system_propmt = "You are a helpful assistant. You will help with the user and tasks"                 
-user_input = "Add task to get a new tire"
+user_input = "Add task to get a new computer and add the description of the task by your own"
 
 prompt = ChatPromptTemplate.from_messages([
     ("system", system_propmt),
