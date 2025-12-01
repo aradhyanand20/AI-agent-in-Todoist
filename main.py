@@ -1,8 +1,9 @@
 from dotenv import load_dotenv
 import os
+from langchain_core.messages import HumanMessage, AIMessage
 from langchain_core.prompts import MessagesPlaceholder
 from langchain_core.output_parsers import StrOutputParser
-from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.prompts import ChatPromptTemplate, HumanMessagePromptTemplate
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain.tools import tool
 from langchain.agents import create_openai_functions_agent, AgentExecutor
@@ -22,29 +23,35 @@ def add_task(task,desc):
     todoist.add_task(content=task,
                      description=desc)
     
-    
-
 tools = [add_task]
 
 llm = ChatGoogleGenerativeAI(
     model = 'gemini-2.5-flash', 
     google_api_key=gemini_api_key,
-     temperature=0.4)
+     temperature=0.3)
 
-system_propmt = "You are a helpful assistant. You will help with the user and tasks"                 
-user_input = "Add task to get a new computer and add the description of the task by your own"
+system_propmt = "You are a helpful assistant. You will help with the user and tasks. If the question is not a tool-related question then answer normally"                 
 
 prompt = ChatPromptTemplate.from_messages([
     ("system", system_propmt),
-    ("human", user_input),
+    MessagesPlaceholder("history"),
+    ("user", "{input}"),
     MessagesPlaceholder("agent_scratchpad")  # type: ignore
 ])
 agent = create_openai_functions_agent(llm,tools,prompt)
 agent_executor = AgentExecutor(agent=agent,tools = tools,verbose=False)
 
-response = agent_executor.invoke({"input": user_input})
+history = []
+while True:
+    user_input = input("you: ")
+    response = agent_executor.invoke({"input": user_input, "history":history})
+    print(response['output'])
+    history.append(HumanMessage(content=user_input))
+    history.append(AIMessage(content=response["output"]))
 
-print(response['output'])
+
+
+
 # chain =prompt | llm | StrOutputParser()
 # print(chain)
 # response = chain.invoke({"input": user_input})
