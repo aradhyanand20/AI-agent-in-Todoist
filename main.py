@@ -23,14 +23,27 @@ def add_task(task,desc):
     todoist.add_task(content=task,
                      description=desc)
     
-tools = [add_task]
+@tool
+def show_task():
+    """
+    show all the existing task to the user
+    """
+    result_paginator = todoist.get_tasks()
+    tasks = []
+    for tasklist in result_paginator:
+        for task in tasklist:
+            tasks.append(task.content)
+    return tasks
+            
+    #  tools list
+tools = [add_task, show_task]
 
 llm = ChatGoogleGenerativeAI(
     model = 'gemini-2.5-flash', 
     google_api_key=gemini_api_key,
      temperature=0.3)
 
-system_propmt = "You are a helpful assistant. You will help with the user and tasks. If the question is not a tool-related question then answer normally"                 
+system_propmt = "You are a helpful assistant. You will help with the user  add tasks.You will help the user to show existing tasks if user ask to show the tasks: for example: 'show me the task' similar to it  and also print them in bullet list format. If the question is not a tool-related question then answer normally"                 
 
 prompt = ChatPromptTemplate.from_messages([
     ("system", system_propmt),
