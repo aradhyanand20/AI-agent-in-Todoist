@@ -35,7 +35,11 @@ def show_task():
             tasks.append(task.content)
     return tasks
             
+<<<<<<< HEAD
     #  tools list
+=======
+    
+>>>>>>> 21677b499b1047778f463f0669bf7a86aaa13e1d
 tools = [add_task, show_task]
 
 llm = ChatGoogleGenerativeAI(
